@@ -1,3 +1,0 @@
-to reset git keys, run
-
-./.scrapy/eevi_key.sh
