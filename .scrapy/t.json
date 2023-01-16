@@ -1,0 +1,1 @@
+{"iss":"https://point-topic.eu.auth0.com/","sub":"google-oauth2|117582552872282070039","aud":["http://ss-api","https://point-topic.eu.auth0.com/userinfo"],"iat":1671567906,"exp":1671654306,"azp":"LO7l7zkVxex8KoslPbx2zpy5lq5ARjuI","scope":"openid profile email offline_access","permissions":["write:articles"]} (useDecodedAccessToken.ts, line 18)

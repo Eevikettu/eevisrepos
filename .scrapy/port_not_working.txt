@@ -1,0 +1,15 @@
+https://stackoverflow.com/questions/3855127/find-and-kill-process-locking-port-3000-on-mac
+# kills port 5000
+lsof -t -i tcp:5000 | xargs kill
+
+# if this does not work, try
+top -b -n 1 -p 5000 | tail -n 1
+
+
+# if the process was 16385, try 
+
+ps -ax | grep 16385
+
+# try googling the process name
+# in this case it was 
+# https://apple.stackexchange.com/questions/431154/controlcenter-app-listens-to-port-5000-tcp-on-monterey-os-is-that-normal-why-d 
