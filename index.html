@@ -1,24 +1,162 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <!-- Load d3.js -->
-    <script src="https://d3js.org/d3.v4.js"></script>
-</head>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>D3 Scatterplot</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+      .tick text {
+        font-size: 24px;
+        color: gray;
+      }
 
-<body>
+      .tick line {
+        stroke: gray;
+        stroke-width: 2px;
+      }
 
-<h1>Hello helo</h1>
+      .domain {
+        stroke: gray;
+        stroke-width: 2px;
+      }
 
-<!-- Create a div where the graph will take place -->
-<div id="my_dataviz"></div>
+      .hilight{
+        fill: #6062AD;
+      }
 
-<h1>"ye"</h1>
-
-<script src='script.js'> </script>
     
-</body>
+    </style>
+    <script src="https://unpkg.com/d3@7.8.1/dist/d3.min.js"></script>
+  </head>
+  <body>
+    <script>
+      const { csv, select, scaleLinear, extent, axisLeft, axisBottom, scalePoint, scaleBand} = d3;
+      console.log("I am about to load the data");
+
+//Tweakable
+      const csvUrl =
+        "../data.csv";
+
+      const parseRow = (d) => {
+        d.consumer_and_business_subscribers = +d.consumer_and_business_subscribers;
+        d.additions = +d.additions;
+        return d;
+      };
+
+      const xValue = (d) => d.TOTALS;
+      const yValue = (d) => d.consumer_and_business_subscribers;
+
+    
+
+      const margin = {top: 50, right: 200, bottom: 50, left: 200,};
+
+      const radius = 5;
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+
+      const svg = select("body")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+  
+//Generic
+      
+
+      const main = async () => {
+        const data = await csv(csvUrl, parseRow);
+        console.log(data)
+
+        const x = scaleBand()
+        .domain(data.map(function(d) { return d.TOTALS; }))
+        .range([margin.left, width - margin.right])
+        .padding(0.2);
+
+        const y = scaleLinear()
+        .domain([27000000, d3.max(data, yValue)])
+        .range([height - margin.bottom, margin.top]);
+
+// Add a tooltip div. Here I define the general feature of the tooltip: stuff that do not depend on the data point.
+  // Its opacity is set to 0: we don't see it by default.
+  const tooltip = d3.select("body")
+    .append("div")
+    .style("opacity", 0)
+    .attr("class", "tooltip")
+    .style("background-color", "black")
+    .style("color", "white")
+    .style("border-radius", "5px")
+    .style("padding", "10px")
+
+//onMouseover
+
+function onMouseOver(d,event) {
+  d3.select(this).attr('class', 'hilight')
+  tooltip
+      .transition()
+      .duration(100)
+      .style("opacity", 1)
+    tooltip
+      .html("Range: " + yValue)
+      .style("left", (event.x)/2-100 + "px")
+      .style("top", (event.y)/2 + "px")
+}
+
+//onMouseOut
+
+function onMouseOut(d,i) {
+  d3.select(this).attr('class', 'bar')
+  tooltip
+      .transition()
+      .duration(100)
+      .style("opacity", 0)
+}
+
+// A function that change this tooltip when the user hover a point.
+  // Its opacity is set to 1: we can now see it. Plus it set the text and position of tooltip depending on the datapoint (d)
+ 
+  const moveTooltip = function(event,d) {
+    tooltip
+    .style("left", (event.x)/2-100 + "px")
+    .style("top", (event.y)/2 + "px")
+  }
+
+
+      const marks = data.map(d => ({
+        x: x(xValue(d)),
+        y: y(yValue(d)),
+      }));
+      console.log(marks);
+     
+  svg.selectAll('rect')
+        .data(marks)
+        .enter()
+        .append('rect')
+        .attr("x", d => d.x)
+        .attr("y", d => d.y)
+        .attr("width", x.bandwidth())
+        .attr("height", d => height - margin.bottom - d.y)
+        .attr("fill", "#2E307A")
+        .on("mouseover", onMouseOver )
+        .on("mousemove", moveTooltip)
+        .on("mouseout", onMouseOut)
+     
+        
+        svg.append('g')
+        .attr('transform', `translate(${margin.left}, 0)`)
+        .call(axisLeft(y));
+
+        svg.append('g')
+        .attr('transform', `translate(0, ${height - margin.bottom})`)
+        .call(axisBottom(x));
+       
+      };
+
+      main();
+    </script>
+  </body>
 </html>
